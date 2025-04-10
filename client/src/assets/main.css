@@ -1,23 +1,25 @@
 @import './base.css';
 
 #app {
-  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
-  padding: 2rem;
   font-weight: normal;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
 }
 
 a,
 .green {
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
+  color: var(--primary-color, hsla(160, 100%, 37%, 1));
   transition: 0.4s;
-  padding: 3px;
 }
 
 @media (hover: hover) {
   a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
+    /* Utiliser la variable de couleur de votre app plutôt qu'un fond */
+    color: var(--hover-color, hsla(160, 100%, 37%, 1));
   }
 }
 
@@ -27,9 +29,8 @@ a,
     place-items: center;
   }
 
+  /* Suppression de la mise en page en grille pour #app car elle est traitée dans App.vue */
   #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+    padding: 0;
   }
 }

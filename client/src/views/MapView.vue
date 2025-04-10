@@ -11,6 +11,7 @@
 
 <style>
 .map-container {
+  margin: 0 auto;
   width: 100%;
   height: 100vh;
   /* Utilise toute la hauteur de la fenêtre */

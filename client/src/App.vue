@@ -1,9 +1,23 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import AuthForm from '@/components/AuthForm.vue'
+import { isAuthenticated, getCurrentUser, logout } from '@/services/authService'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const showAuthForm = ref(false)
 const authMode = ref('login') // 'login' or 'register'
+const isLoggedIn = ref(false)
+const currentUser = ref(null)
+
+// Check if user is already logged in on component mount
+onMounted(() => {
+  isLoggedIn.value = isAuthenticated()
+  if (isLoggedIn.value) {
+    currentUser.value = getCurrentUser()
+  }
+})
 
 const toggleAuthForm = () => {
   showAuthForm.value = !showAuthForm.value
@@ -11,6 +25,19 @@ const toggleAuthForm = () => {
 
 const switchAuthMode = () => {
   authMode.value = authMode.value === 'login' ? 'register' : 'login'
+}
+
+const handleAuthSuccess = (user) => {
+  isLoggedIn.value = true
+  currentUser.value = user
+  showAuthForm.value = true
+}
+
+const handleLogout = () => {
+  logout()
+  isLoggedIn.value = false
+  currentUser.value = null
+  router.push('/')
 }
 </script>
 
@@ -24,10 +51,14 @@ const switchAuthMode = () => {
 
       <nav>
         <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
         <RouterLink to="/map">Regions</RouterLink>
-        <RouterLink to="/recommendations">For You</RouterLink>
-        <button @click="toggleAuthForm" class="auth-button">
+        <RouterLink to="/app">For You</RouterLink>
+
+        <div v-if="isLoggedIn" class="user-menu">
+          <span class="username">{{ currentUser?.username }}</span>
+          <button @click="handleLogout" class="auth-button logout-button">Logout</button>
+        </div>
+        <button v-else @click="toggleAuthForm" class="auth-button">
           {{ showAuthForm ? 'Close' : 'Login' }}
         </button>
       </nav>
@@ -35,44 +66,9 @@ const switchAuthMode = () => {
 
     <main>
       <div class="content-container">
-        <!-- Authentication form -->
-        <div v-if="showAuthForm" class="auth-form-container">
-          <div class="auth-form">
-            <h2>{{ authMode === 'login' ? 'Login' : 'Create Account' }}</h2>
-
-            <form @submit.prevent>
-              <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" placeholder="Your email">
-              </div>
-
-              <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Your password">
-              </div>
-
-              <div v-if="authMode === 'register'" class="form-group">
-                <label for="confirmPassword">Confirm Password</label>
-                <input type="password" id="confirmPassword" placeholder="Confirm password">
-              </div>
-
-              <button type="submit" class="submit-button">
-                {{ authMode === 'login' ? 'Login' : 'Create Account' }}
-              </button>
-            </form>
-
-            <div class="auth-switch">
-              <span v-if="authMode === 'login'">
-                Don't have an account?
-                <button @click="switchAuthMode" class="text-button">Create Account</button>
-              </span>
-              <span v-else>
-                Already have an account?
-                <button @click="switchAuthMode" class="text-button">Login</button>
-              </span>
-            </div>
-          </div>
-        </div>
+        <!-- Utilisation du composant AuthForm -->
+        <AuthForm :showAuthForm="showAuthForm" :authMode="authMode" @close="toggleAuthForm" @switchMode="switchAuthMode"
+          @authSuccess="handleAuthSuccess" />
 
         <!-- Main content -->
         <RouterView />
@@ -92,6 +88,7 @@ const switchAuthMode = () => {
   </div>
 </template>
 
+
 <style>
 :root {
   --primary-color: #1db954;
@@ -103,7 +100,7 @@ const switchAuthMode = () => {
   --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   --glassmorphism-bg: rgba(25, 20, 20, 0.7);
   --glassmorphism-blur: 10px;
-  --container-width: 1200px;
+  --container-width: 80vw;
 }
 
 * {
@@ -126,6 +123,11 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  width: var(--container-width);
+  margin: 0 auto;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
 }
 
 header {
@@ -209,12 +211,21 @@ nav a.router-link-active::before {
 }
 
 main {
+  width: 100%;
   flex: 1;
   padding: 2rem;
   display: flex;
   justify-content: center;
   position: relative;
   z-index: 1;
+  margin: 0 auto;
+}
+
+.content-container {
+  width: 80vw;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  position: relative;
 }
 
 main::before {
@@ -265,7 +276,6 @@ footer {
   color: var(--primary-color);
 }
 
-/* Authentication Styles */
 .auth-button {
   background-color: var(--primary-color);
   color: var(--secondary-color);
@@ -283,102 +293,6 @@ footer {
 .auth-button:hover {
   background-color: var(--hover-color);
   transform: translateY(-2px);
-}
-
-.auth-form-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.auth-form {
-  background-color: var(--secondary-color);
-  border-radius: var(--border-radius);
-  padding: 2rem;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: var(--box-shadow);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.auth-form h2 {
-  color: var(--primary-color);
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.form-group {
-  margin-bottom: 1.2rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--accent-color);
-  font-size: 0.9rem;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 0.8rem;
-  border-radius: var(--border-radius);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--text-color);
-  font-size: 1rem;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(29, 185, 84, 0.2);
-}
-
-.submit-button {
-  width: 100%;
-  background-color: var(--primary-color);
-  color: var(--secondary-color);
-  border: none;
-  border-radius: var(--border-radius);
-  padding: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 0.5rem;
-  font-size: 1rem;
-}
-
-.submit-button:hover {
-  background-color: var(--hover-color);
-}
-
-.auth-switch {
-  margin-top: 1.5rem;
-  text-align: center;
-  color: var(--accent-color);
-  font-size: 0.9rem;
-}
-
-.text-button {
-  background: none;
-  border: none;
-  color: var(--primary-color);
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding: 0;
-  margin-left: 0.3rem;
-}
-
-.text-button:hover {
-  text-decoration: underline;
 }
 
 @media (max-width: 768px) {
@@ -402,14 +316,32 @@ footer {
     font-size: 0.8rem;
   }
 
-  .auth-button {
-    margin-top: 0.5rem;
-  }
-
   .footer-content {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
   }
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.username {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.logout-button {
+  background-color: transparent;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.logout-button:hover {
+  background-color: rgba(29, 185, 84, 0.1);
 }
 </style>

@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',
     # Local apps
     'accounts',
-    'recommendations'
+    'recommendations',
 ]
 
 MIDDLEWARE = [

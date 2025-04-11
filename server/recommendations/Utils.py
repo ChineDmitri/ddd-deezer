@@ -39,7 +39,7 @@ def load_data_listeners():
         print(f"Erreur lors du chargement des données : {e}")
         return None, False
     
-def get_popular_genres_by_region(df_genre_region_age, region=None):
+def get_popular_genres_by_region(df_genre_region_age, region=None, artist=False):
     if df_genre_region_age is None or df_genre_region_age.empty:
         return {"error": "Données non chargées."}
 
@@ -86,16 +86,28 @@ def get_popular_genres_by_region(df_genre_region_age, region=None):
         # Évite division par zéro
         max_score = 1
     
-    # Ajout des scores dans le résultat, normalisés sur 10
-    for genre, score in sorted_genres[:10]:
-        # Normalisation du score sur 10
-        normalized_score = min(10, round((score / max_score) * 10, 1))
-        
-        region_data["genres"].append({
-            'genre': genre,
-            'score': f"{normalized_score}/10",
-            'raw_score': score
-        })
+    if artist:
+        # Ajout des scores dans le résultat, normalisés sur 10
+        for genre, score in sorted_genres:
+            # Normalisation du score sur 10
+            normalized_score = min(10, round((score / max_score) * 10, 1))
+            
+            region_data["genres"].append({
+                'genre': genre,
+                'score': f"{normalized_score}/10",
+                'raw_score': score
+            })
+    else: 
+        # Ajout des scores dans le résultat, normalisés sur 10
+        for genre, score in sorted_genres[:10]:
+            # Normalisation du score sur 10
+            normalized_score = min(10, round((score / max_score) * 10, 1))
+            
+            region_data["genres"].append({
+                'genre': genre,
+                'score': f"{normalized_score}/10",
+                'raw_score': score
+            })
 
     results.append(region_data)
 
@@ -104,7 +116,7 @@ def get_popular_genres_by_region(df_genre_region_age, region=None):
     
     return results
 
-def get_popular_genres_by_region_and_age(df_genre_region_age, region=None, age_group=None):
+def get_popular_genres_by_region_and_age(df_genre_region_age, region=None, age_group=None, artist=False):
     if df_genre_region_age is None or df_genre_region_age.empty:
         return {"error": "Données pas chargées"}
     
@@ -152,16 +164,28 @@ def get_popular_genres_by_region_and_age(df_genre_region_age, region=None, age_g
         # Évite division par zéro
         max_score = 1
     
-    # Ajout des scores dans le résultat, normalisés sur 10
-    for genre, score in sorted_genres[:10]:
-        # Normalisation du score sur 10
-        normalized_score = min(10, round((score / max_score) * 10, 1))
-        
-        region_data["genres"].append({
-            'genre': genre,
-            'score': f"{normalized_score}/10",
-            'raw_score': score
-        })
+    if artist:
+        # Ajout des scores dans le résultat, normalisés sur 10
+        for genre, score in sorted_genres:
+            # Normalisation du score sur 10
+            normalized_score = min(10, round((score / max_score) * 10, 1))
+            
+            region_data["genres"].append({
+                'genre': genre,
+                'score': f"{normalized_score}/10",
+                'raw_score': score
+            })
+    else:
+        # Ajout des scores dans le résultat, normalisés sur 10
+        for genre, score in sorted_genres[:10]:
+            # Normalisation du score sur 10
+            normalized_score = min(10, round((score / max_score) * 10, 1))
+            
+            region_data["genres"].append({
+                'genre': genre,
+                'score': f"{normalized_score}/10",
+                'raw_score': score
+            })
     
     region_data["age_group"] = age_group
     results.append(region_data)

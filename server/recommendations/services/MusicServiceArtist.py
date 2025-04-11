@@ -6,10 +6,10 @@ class MusicServiceArtist:
         self.df_genre_region_age, self.df_tracks, self.data_loaded = load_data_artists()
 
     def get_artists_genre_by_region(self, region=None):
-        return get_popular_genres_by_region(self.df_genre_region_age, region)
+        return get_popular_genres_by_region(self.df_genre_region_age, region, True)
 
     def get_artists_genre_by_region_and_age(self, region=None, age=None):
-        return get_popular_genres_by_region_and_age(self.df_genre_region_age, region, age)
+        return get_popular_genres_by_region_and_age(self.df_genre_region_age, region, age, True)
     
     def get_tracks_from_genre_and_region(self, region=None, genre=None):
         

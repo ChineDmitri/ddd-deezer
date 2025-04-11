@@ -39,6 +39,11 @@ const handleLogout = () => {
   currentUser.value = null
   router.push('/')
 }
+
+const formatDate = (date) => {
+  const options = { year: 'numeric', month: 'long', day: 'numeric' }
+  return new Date(date).toLocaleDateString(undefined, options)
+}
 </script>
 
 <template>
@@ -46,7 +51,7 @@ const handleLogout = () => {
     <header>
       <div class="logo-container">
         <img alt="Music logo" class="logo" src="@/assets/logo.svg" width="50" height="50" />
-        <h1>Recommendation Music</h1>
+        <h1>MixMatch</h1>
       </div>
 
       <nav>
@@ -55,7 +60,27 @@ const handleLogout = () => {
         <RouterLink to="/app">For You</RouterLink>
 
         <div v-if="isLoggedIn" class="user-menu">
-          <span class="username">{{ currentUser?.username }}</span>
+          <div class="user-profile-container">
+            <span class="username">{{ currentUser?.username }}</span>
+            <div class="user-tooltip">
+              <div class="tooltip-header">
+                <strong>{{ currentUser?.username }}</strong>
+                <span class="user-role">{{ currentUser?.role }}</span>
+              </div>
+              <div class="tooltip-content">
+                <p v-if="currentUser?.email"><strong>Email:</strong> {{ currentUser?.email }}</p>
+                <p v-if="currentUser?.first_name || currentUser?.last_name">
+                  <strong>Name:</strong> {{ (currentUser?.first_name || '') + ' ' + (currentUser?.last_name || '') }}
+                </p>
+                <p v-if="currentUser?.birth_date">
+                  <strong>Birth Date:</strong> {{ formatDate(currentUser?.birth_date) }}
+                </p>
+                <p v-if="currentUser?.favorite_genres">
+                  <strong>Favorite Genres:</strong> {{ currentUser?.favorite_genres || 'None specified' }}
+                </p>
+              </div>
+            </div>
+          </div>
           <button @click="handleLogout" class="auth-button logout-button">Logout</button>
         </div>
         <button v-else @click="toggleAuthForm" class="auth-button">
@@ -77,7 +102,7 @@ const handleLogout = () => {
 
     <footer>
       <div class="footer-content">
-        <p>&copy; 2025 DDD Music Recommendation Project</p>
+        <p>&copy; 2025 MixMatch - Project DDD</p>
         <div class="social-links">
           <a href="#" class="social-link">Instagram</a>
           <a href="#" class="social-link">Twitter</a>
@@ -343,5 +368,46 @@ footer {
 
 .logout-button:hover {
   background-color: rgba(29, 185, 84, 0.1);
+}
+
+.user-profile-container {
+  position: relative;
+}
+
+.user-tooltip {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 1rem;
+  display: none;
+  z-index: 10;
+}
+
+.user-profile-container:hover .user-tooltip {
+  display: block;
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.tooltip-header strong {
+  font-size: 1rem;
+}
+
+.tooltip-header .user-role {
+  font-size: 0.85rem;
+  color: var(--accent-color);
+}
+
+.tooltip-content p {
+  margin: 0.3rem 0;
 }
 </style>

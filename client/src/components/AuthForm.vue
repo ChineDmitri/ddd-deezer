@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref } from 'vue';
-import { registerUser, loginUser, storeAuthData } from '@/services/authService';
+import { registerUser, loginUser, storeAuthData, completeLoginProcess, getDetailedUserProfile } from '@/services/authService';
 
 const props = defineProps({
   showAuthForm: Boolean,
@@ -105,47 +105,31 @@ const handleSubmit = async () => {
         password: password.value
       });
 
-      // After registration, automatically login the user
-      const tokens = await loginUser({
+      // After registration, use completeLoginProcess to login and fetch user profile
+      const { tokens, profile } = await completeLoginProcess({
         username: username.value,
         password: password.value
       });
-
-      // Store authentication data
-      storeAuthData(tokens, user);
 
       successMessage.value = 'Account created successfully!';
 
       // Pour l'inscription
       setTimeout(() => {
-        emit('authSuccess', user);
+        emit('authSuccess', profile);
         closeForm();
       }, 1500);
     } else {
-      // Login user
-      const tokens = await loginUser({
+      // Login user and fetch complete profile in one step
+      const { tokens, profile } = await completeLoginProcess({
         username: username.value,
         password: password.value
       });
-
-      // For simplicity, we'll create a minimal user object here
-      // In a real app, you'd fetch the full user profile
-      const user = {
-        username: username.value,
-        email: '', // This would be populated from API
-        first_name: '',
-        last_name: '',
-        birth_date: null,
-        role: 'listener'
-      };
-
-      storeAuthData(tokens, user);
 
       successMessage.value = 'Login successful!';
 
       // Pour la connexion
       setTimeout(() => {
-        emit('authSuccess', user);
+        emit('authSuccess', profile);
         closeForm();
       }, 1000);
     }

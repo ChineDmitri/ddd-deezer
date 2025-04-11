@@ -27,6 +27,15 @@ interface UserProfile {
   last_name: string
   birth_date: string | null
   role: string
+  id?: number
+  user?: {
+    id: number
+    username: string
+    email: string
+    first_name: string
+    last_name: string
+  }
+  favorite_genres?: string
 }
 
 /**
@@ -119,6 +128,44 @@ export async function getUserProfile(token: string): Promise<UserProfile> {
 }
 
 /**
+ * Fetch detailed user profile including role information
+ * @param token Access token
+ * @returns Detailed user profile
+ */
+export async function getDetailedUserProfile(token: string): Promise<UserProfile> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/profile/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to get detailed user profile: ${response.status}`)
+    }
+
+    const profileData = await response.json()
+
+    // Format the data to match our UserProfile interface
+    const userData: UserProfile = {
+      id: profileData.id,
+      username: profileData.user.username,
+      email: profileData.user.email,
+      first_name: profileData.user.first_name,
+      last_name: profileData.user.last_name,
+      birth_date: profileData.birth_date,
+      role: profileData.role,
+      favorite_genres: profileData.favorite_genres,
+    }
+
+    return userData
+  } catch (error) {
+    console.error('Error fetching detailed user profile:', error)
+    throw error
+  }
+}
+
+/**
  * Store user authentication data in localStorage
  * @param tokens Authentication tokens
  * @param user User profile
@@ -155,10 +202,66 @@ export function getCurrentUser(): UserProfile | null {
 }
 
 /**
+ * Get current user role
+ * @returns User role or 'guest' if not authenticated
+ */
+export function getCurrentUserRole(): string {
+  const user = getCurrentUser()
+  return user?.role || 'guest'
+}
+
+/**
  * Logout current user
  */
 export function logout(): void {
   localStorage.removeItem('accessToken')
   localStorage.removeItem('refreshToken')
   localStorage.removeItem('user')
+}
+
+/**
+ * Complete login process: login and fetch detailed profile
+ * @param credentials User login credentials
+ * @returns User profile
+ */
+export async function completeLoginProcess(
+  credentials: LoginCredentials,
+): Promise<{ tokens: LoginResponse; profile: UserProfile }> {
+  try {
+    // First login to get tokens
+    const tokens = await loginUser(credentials)
+
+    // Then fetch detailed profile
+    const profile = await getDetailedUserProfile(tokens.access)
+
+    // Store authentication data
+    storeAuthData(tokens, profile)
+
+    return { tokens, profile }
+  } catch (error) {
+    console.error('Complete login process failed:', error)
+    throw error
+  }
+}
+
+/**
+ * Get the appropriate API URL based on user role
+ * @param endpoint The endpoint path
+ * @returns Complete API URL
+ */
+export function getRoleBasedApiUrl(endpoint: string): string {
+  const user = getCurrentUser()
+  console.log('curUser: ', user)
+  const role = user?.role || 'listener' // Default to listener if no role found
+
+  if (endpoint === 'popular-genres-region-age') {
+    if (role === 'artist') {
+      return `${API_BASE_URL}/music/artists/${endpoint}/`
+    } else {
+      return `${API_BASE_URL}/music/listeners/${endpoint}/`
+    }
+  }
+
+  // For other endpoints, return generic URL
+  return `${API_BASE_URL}/${endpoint}/`
 }

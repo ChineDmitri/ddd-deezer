@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import { isAuthenticated } from '@/services/authService'
+import { isAuthenticated, getCurrentUser } from '@/services/authService'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,6 +16,12 @@ const router = createRouter({
       component: () => import('../views/MapView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/admin-ui',
+      name: 'admin',
+      component: () => import('../views/AdminView.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
   ],
 })
 
@@ -28,10 +34,24 @@ router.beforeEach((to, from, next) => {
       // If not authenticated, redirect to home page
       next({
         path: '/',
-        // Optional: Add a query parameter to indicate authentication is required
         query: { authRequired: 'true' },
       })
-    } else {
+    } 
+    // Check if route requires admin role
+    else if (to.matched.some((record) => record.meta.requiresAdmin)) {
+      const user = getCurrentUser()
+      if (user?.role !== 'admin') {
+        // User is not an admin, redirect to home
+        next({
+          path: '/',
+          query: { accessDenied: 'true' },
+        })
+      } else {
+        // User is an admin, proceed
+        next()
+      }
+    }
+    else {
       // User is authenticated, proceed to requested page
       next()
     }

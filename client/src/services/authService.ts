@@ -211,6 +211,15 @@ export function getCurrentUserRole(): string {
 }
 
 /**
+ * Check if current user has admin role
+ * @returns Boolean indicating if user has admin role
+ */
+export function isAdmin(): boolean {
+  const user = getCurrentUser()
+  return user?.role === 'admin'
+}
+
+/**
  * Logout current user
  */
 export function logout(): void {

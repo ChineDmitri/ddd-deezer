@@ -68,3 +68,72 @@ Avant de configurer le projet, assurez-vous d'avoir les éléments suivants inst
    ```
 
    Vous pouvez maintenant accéder à l'application à l'adresse `http://127.0.0.1:8000/`.
+
+
+--- 
+
+# Instructions de Configuration pour le Client (Front-end) Vue.js
+
+Interface utilisateur pour la plateforme développée avec Vue 3 et TypeScript.
+
+## Prérequis
+
+- Node.js v20.17.0
+- npm (inclus avec Node.js)
+
+### Installation des dépendances
+
+```bash
+npm install
+```
+
+### Lancement du serveur de développement
+
+```bash
+npm run dev
+```
+
+Le serveur de développement sera accessible à l'adresse locale indiquée dans le terminal (généralement http://localhost:5173).
+
+### Compilation et minification pour la production
+
+```bash
+npm run build
+```
+
+## Structure du projet
+
+- **src/** - Code source de l'application
+  - **assets/** - Ressources statiques (images, styles)
+  - **components/** - Composants Vue réutilisables
+  - **router/** - Configuration des routes de l'application
+  - **services/** - Services et utilitaires
+  - **views/** - Composants Vue représentant des pages complètes
+
+## Fonctionnalités principales
+
+- **Authentification** - Gestion des utilisateurs et des rôles
+- **Tableau de bord administrateur** - Statistiques et monitoring
+- **Visualisation des tendances** - Carte interactive des genres populaires
+
+## Comptes de test
+
+### Administrateur
+- Identifiant : dchine
+- Mot de passe : test123!
+
+### Artiste
+- Identifiant : Lady-Gaga
+- Mot de passe : test123!
+
+### Auditeur
+- Identifiant : John
+- Mot de passe : test123!
+
+## Technologies utilisées
+
+- Vue.js 3 avec l'API de composition
+- TypeScript
+- Vue Router pour la navigation
+- Chart.js pour la visualisation de données
+- Vite comme outil de build

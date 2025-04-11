@@ -413,7 +413,9 @@ export default {
       }));
     },
     isArtist() {
-      return getCurrentUserRole() === 'artist';
+      // Permettre aux admins de voir les mêmes fonctionnalités que les artistes
+      const role = getCurrentUserRole();
+      return role === 'artist' || role === 'admin';
     },
   },
   methods: {
@@ -428,7 +430,7 @@ export default {
       // Si une région valide est sélectionnée
       if (regionName) {
         if (this.isArtist) {
-          // Pour les artistes, récupérer à la fois les données globales et par âge
+          // Pour les artistes et admins, récupérer à la fois les données globales et par âge
           await Promise.all([
             this.fetchArtistRegionGenres(regionName),
             this.fetchPopularGenres(regionName, this.selectedAge)
@@ -446,9 +448,17 @@ export default {
 
       try {
         // URL spécifique selon le rôle de l'utilisateur
-        const apiUrl = this.isArtist
-          ? `${API_BASE_URL}/music/artists/popular-genres-region-age/`
-          : getRoleBasedApiUrl('popular-genres-region-age');
+        let apiUrl;
+        const userRole = getCurrentUserRole();
+        
+        if (userRole === 'artist') {
+          apiUrl = `${API_BASE_URL}/music/artists/popular-genres-region-age/`;
+        } else if (userRole === 'admin') {
+          // Les administrateurs utilisent le même endpoint que les artistes
+          apiUrl = `${API_BASE_URL}/music/artists/popular-genres-region-age/`;
+        } else {
+          apiUrl = getRoleBasedApiUrl('popular-genres-region-age');
+        }
 
         const url = new URL(apiUrl);
         url.searchParams.append('region', region);

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import AuthForm from '@/components/AuthForm.vue'
 import { isAuthenticated, getCurrentUser, logout } from '@/services/authService'
 import { useRouter } from 'vue-router'
@@ -10,6 +10,11 @@ const showAuthForm = ref(false)
 const authMode = ref('login') // 'login' or 'register'
 const isLoggedIn = ref(false)
 const currentUser = ref(null)
+
+// Add isAdmin computed property
+const isAdmin = computed(() => {
+  return currentUser.value?.role === 'admin'
+})
 
 // Check if user is already logged in on component mount
 onMounted(() => {
@@ -27,10 +32,11 @@ const switchAuthMode = () => {
   authMode.value = authMode.value === 'login' ? 'register' : 'login'
 }
 
+// Fix the handleAuthSuccess function to close the form after successful login
 const handleAuthSuccess = (user) => {
   isLoggedIn.value = true
   currentUser.value = user
-  showAuthForm.value = true
+  showAuthForm.value = false  // Changed from true to false to close the form
 }
 
 const handleLogout = () => {
@@ -57,7 +63,7 @@ const formatDate = (date) => {
       <nav>
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/map">Regions</RouterLink>
-        <RouterLink to="/app">For You</RouterLink>
+        <RouterLink v-if="isAdmin" to="/admin-ui">Espace Direction</RouterLink>
 
         <div v-if="isLoggedIn" class="user-menu">
           <div class="user-profile-container">

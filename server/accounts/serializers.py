@@ -18,7 +18,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     password =serializers.CharField(write_only=True)
     favorite_genres = serializers.CharField(required=False, allow_blank=True)
     birth_date = serializers.DateField(required=False, allow_null=True)
-    role = serializers.ChoiceField(choices=[('artist', 'Artist'), ('listener', 'Listener')], default='listener')
+    role = serializers.ChoiceField(choices=[('artist', 'Artist'), ('listener', 'Listener'), ('admin', 'admin')], default='listener')
 
     class Meta: 
         model = User

@@ -48,3 +48,31 @@ def get_tracks_from_genre_and_region_artist(request):
         return Response({"error": result["error"]}, status=400)
     
     return Response(result, status=200)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_metrics_by_genre(request):
+
+    genre = request.query_params.get('genre', None)
+
+    result = music_artist_service.get_metrics_by_genre(genre)
+
+    if "error" in result:
+        return Response({"error": result["error"]}, status=400)
+    
+    return Response(result, status=200)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_metrics_by_region(request):
+
+    region = request.query_params.get('region', None)
+
+    result = music_artist_service.get_metrics_by_region(region)
+
+    if "error" in result:
+        return Response({"error": result["error"]}, status=400)
+    
+    return Response(result, status=200)
+
+

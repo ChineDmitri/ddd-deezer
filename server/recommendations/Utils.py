@@ -104,7 +104,6 @@ def get_popular_genres_by_region(df_genre_region_age, region=None):
     
     return results
 
-
 def get_popular_genres_by_region_and_age(df_genre_region_age, region=None, age_group=None):
     if df_genre_region_age is None or df_genre_region_age.empty:
         return {"error": "Données pas chargées"}
@@ -171,3 +170,57 @@ def get_popular_genres_by_region_and_age(df_genre_region_age, region=None, age_g
         return results[0] if results else {"error": f"Aucune donnée pour la région: {region}"}
     
     return results
+
+def calculate_genre_metrics(df, genre, valid_metrics):
+    print(f"LE GENRE EST {genre}")
+    # On explode la liste des genres pour avoir une ligne par genre
+    df_exploded = df.explode('all_genres')
+
+    # On filtre par genre
+    if genre:
+        df_exploded = df_exploded[df_exploded['all_genres'].str.contains(genre, na=False)]
+        if df_exploded.empty:
+            return {"error": f"Aucune donnée pour le genre: {genre}"}
+    
+    resuls = df_exploded.groupby('all_genres')[valid_metrics].mean().reset_index()
+
+    # Formatage des résultats
+    genre_stats = []
+    for _, row in resuls.iterrows():
+        genre_data = {
+            'genre': genre,
+            'metrics': {metric: round(row[metric], 2) if not pd.isna(row[metric]) else 0 for metric in valid_metrics}
+        }
+        genre_stats.append(genre_data)
+    
+    # On retourne les résultats du genre passé en paramètre
+    if genre:
+        return genre_stats[0] if genre_stats else {"error": f"Aucune donnée pour le genre: {genre}"}
+    return genre_stats
+
+def calculate_region_metrics(df, region, valid_metrics):
+    # On explode la liste des regions pour avoir une ligne par région
+    df_exploded = df.explode('regions_recommandees')
+    # On filtre par région
+    if region:
+        df_exploded = df_exploded[df_exploded['regions_recommandees'].str.contains(region, na=False)]
+        if df_exploded.empty:
+            return {"error": f"Aucune donnée pour la région: {region}"}
+
+    # Groupement par région et calcul de la moyenne
+    resuls = df_exploded.groupby('regions_recommandees')[valid_metrics].mean().reset_index()
+
+    # Formatage des résultats
+    region_stats = []
+    for _, row in resuls.iterrows():
+        region_data = {
+            'region': region,
+            'metrics': {metric: round(row[metric], 2) if not pd.isna(row[metric]) else 0 for metric in valid_metrics}
+        }
+        region_stats.append(region_data)
+
+    # On retourne les résultats de la région passée en paramètre
+    if region:
+        return region_stats[0] if region_stats else {"error": f"Aucune donnée pour la région: {region}"}
+    return region_stats
+    

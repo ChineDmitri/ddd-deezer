@@ -1,4 +1,4 @@
-from ..Utils import load_data_artists, get_popular_genres_by_region, get_popular_genres_by_region_and_age
+from ..Utils import load_data_artists, get_popular_genres_by_region, get_popular_genres_by_region_and_age, calculate_genre_metrics, calculate_region_metrics
 
 
 class MusicServiceArtist:
@@ -60,3 +60,41 @@ class MusicServiceArtist:
             return results[0] if results else {"error": f"Aucune donnée pour la région: {region} et le genre: {genre}"}
         
         return results
+
+    def get_metrics_by_genre(self, genre=None):
+        
+        if self.df_tracks is None or self.df_tracks.empty:
+            return {"error": "Données des chansons non chargées"}
+        
+        tracks = self.df_tracks.copy()
+
+        # Liste des métriques à analyser
+        metrics = ['bpm', 'gain', 'duration_minutes', 'danceability', 
+                   'energy', 'acousticness', 'instrumentalness', 'valence']
+        
+        # On s'assure d'avoir les colonnes dans le DF
+        valid_metrics = [metric for metric in metrics if metric in tracks.columns]
+
+        if not valid_metrics:
+            return {"error": "Aucune métrique valide à analyser"}
+        
+        return calculate_genre_metrics(tracks, genre, valid_metrics)
+        
+    def get_metrics_by_region(self, region=None):
+
+        if self.df_tracks is None or self.df_tracks.empty:
+            return {"error": "Données des chansons non chargées"}
+        
+        tracks = self.df_tracks.copy()
+
+        # Liste des métriques à analyser
+        metrics = ['bpm', 'gain', 'duration_minutes', 'danceability', 
+                   'energy', 'acousticness', 'instrumentalness', 'valence']
+        
+        # On s'assure d'avoir les colonnes dans le DF
+        valid_metrics = [metric for metric in metrics if metric in tracks.columns]
+
+        if not valid_metrics:
+            return {"error": "Aucune métrique valide à analyser"}
+        
+        return calculate_region_metrics(tracks, region, valid_metrics)

@@ -53,9 +53,62 @@
         </div>
         <div class="genres-subtitle">{{ selectedRegionName }} - {{ selectedAge }}</div>
         <div class="genres-grid">
-          <div v-for="(genre, index) in popularGenres" :key="index" class="genre-card">
+          <div v-for="(genre, index) in popularGenres" :key="index" class="genre-card"
+            @click="showGenreMetrics(genre.genre)">
             <h4>{{ genre.genre }}</h4>
             <div class="score">{{ genre.score }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal pour afficher les métriques d'un genre -->
+      <div v-if="showMetricsModal" class="metrics-modal-overlay" @click.self="closeModal">
+        <div class="metrics-modal">
+          <div class="metrics-modal-header">
+            <h3>Métriques pour le genre <span class="genre-name">{{ selectedGenre }}</span></h3>
+            <button class="close-modal-button" @click="closeModal">×</button>
+          </div>
+          <div v-if="loadingMetrics" class="metrics-loading">
+            <div class="spinner"></div> Chargement des métriques...
+          </div>
+          <div v-else-if="metricsError" class="metrics-error">
+            {{ metricsError }}
+          </div>
+          <div v-else-if="genreMetrics" class="metrics-content">
+            <div class="metrics-grid">
+              <div class="metric-item">
+                <div class="metric-label">BPM</div>
+                <div class="metric-value">{{ genreMetrics.metrics.bpm }}</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">Gain</div>
+                <div class="metric-value">{{ genreMetrics.metrics.gain }} dB</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">Durée moyenne</div>
+                <div class="metric-value">{{ genreMetrics.metrics.duration_minutes.toFixed(2) }} min</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">Dansabilité</div>
+                <div class="metric-value">{{ (genreMetrics.metrics.danceability * 100).toFixed(0) }}%</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">Énergie</div>
+                <div class="metric-value">{{ (genreMetrics.metrics.energy * 100).toFixed(0) }}%</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">Acoustique</div>
+                <div class="metric-value">{{ (genreMetrics.metrics.acousticness * 100).toFixed(0) }}%</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">Instrumental</div>
+                <div class="metric-value">{{ (genreMetrics.metrics.instrumentalness * 100).toFixed(0) }}%</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">Valence</div>
+                <div class="metric-value">{{ (genreMetrics.metrics.valence * 100).toFixed(0) }}%</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -256,11 +309,36 @@ body {
   background-color: var(--muesli-500);
   color: white;
   min-height: 80px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
 
 .genre-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.genre-card::after {
+  /* N'afficher l'icône que pour certains rôles - on supprime l'attribut content ici */
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  font-size: 12px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+/* Ajouter cette classe pour les utilisateurs admin et artist */
+.artist-view .genre-card::after,
+.admin-view .genre-card::after {
+  content: "📊";
+  /* Icône de statistiques pour admin/artist */
+}
+
+/* La classe hover reste pour tous */
+.genre-card:hover::after {
+  opacity: 1;
 }
 
 .genre-card h4 {
@@ -318,6 +396,101 @@ body {
 .chart-wrapper {
   height: 350px;
   position: relative;
+}
+
+.metrics-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.metrics-modal {
+  background-color: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.metrics-modal-header {
+  background-color: var(--muesli-500);
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metrics-modal-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.genre-name {
+  font-weight: 700;
+}
+
+.close-modal-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.metrics-content {
+  padding: 20px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.metric-item {
+  background-color: var(--muesli-50);
+  border-radius: 8px;
+  padding: 15px;
+  border-left: 4px solid var(--muesli-300);
+}
+
+.metric-label {
+  font-size: 0.9rem;
+  color: var(--muesli-700);
+  margin-bottom: 5px;
+}
+
+.metric-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--muesli-900);
+}
+
+.metrics-loading {
+  padding: 30px;
+  text-align: center;
+  color: var(--muesli-700);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.metrics-error {
+  padding: 20px;
+  color: #e74c3c;
+  text-align: center;
+  font-weight: 500;
 }
 
 .status-message {
@@ -402,6 +575,11 @@ export default {
       chart: null,
       showRegionChart: true, // Par défaut, afficher la vue globale pour les artistes
       regionGenresData: null, // Pour stocker les données globales de la région
+      showMetricsModal: false,
+      selectedGenre: null,
+      genreMetrics: null,
+      loadingMetrics: false,
+      metricsError: null,
     };
   },
   computed: {
@@ -450,7 +628,7 @@ export default {
         // URL spécifique selon le rôle de l'utilisateur
         let apiUrl;
         const userRole = getCurrentUserRole();
-        
+
         if (userRole === 'artist') {
           apiUrl = `${API_BASE_URL}/music/artists/popular-genres-region-age/`;
         } else if (userRole === 'admin') {
@@ -660,6 +838,57 @@ export default {
           });
         }
       });
+    },
+
+    async showGenreMetrics(genre) {
+      // Seuls les utilisateurs admin et artist peuvent voir les métriques détaillées
+      const userRole = getCurrentUserRole();
+      if (userRole !== 'admin' && userRole !== 'artist') {
+        return;
+      }
+
+      this.selectedGenre = genre;
+      this.showMetricsModal = true;
+      this.loadingMetrics = true;
+      this.metricsError = null;
+      this.genreMetrics = null;
+
+      try {
+        const apiUrl = `${API_BASE_URL}/music/artists/metrics-genre/`;
+        const url = new URL(apiUrl);
+        url.searchParams.append('region', this.selectedRegionName);
+        url.searchParams.append('genre', genre);
+
+        const accessToken = getAccessToken();
+        const options = {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        };
+
+        if (accessToken) {
+          options.headers['Authorization'] = `Bearer ${accessToken}`;
+        }
+
+        const response = await fetch(url, options);
+
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.genreMetrics = data;
+      } catch (err) {
+        console.error('Erreur lors de la récupération des métriques du genre:', err);
+        this.metricsError = 'Impossible de récupérer les métriques pour ce genre musical.';
+      } finally {
+        this.loadingMetrics = false;
+      }
+    },
+
+    closeModal() {
+      this.showMetricsModal = false;
     },
 
     toggleView() {

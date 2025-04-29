@@ -116,20 +116,6 @@ npm run build
 - **Tableau de bord administrateur** - Statistiques et monitoring
 - **Visualisation des tendances** - Carte interactive des genres populaires
 
-## Comptes de test
-
-### Administrateur
-- Identifiant : dchine
-- Mot de passe : test123!
-
-### Artiste
-- Identifiant : Lady-Gaga
-- Mot de passe : test123!
-
-### Auditeur
-- Identifiant : John
-- Mot de passe : test123!
-
 ## Technologies utilisées
 
 - Vue.js 3 avec l'API de composition

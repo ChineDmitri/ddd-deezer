@@ -142,7 +142,7 @@ npm run build
 Assurez-vous que le serveur backend Django est en cours d'exécution sur le port 8000
 Assurez-vous que le client frontend Vue.js est en cours d'exécution sur le port 5173
 Exécutez les tests d'intégration:
-# À partir de la racine du projet
+\# À partir de la racine du projet
 ```bash
 python -m unittest discover tests/integration
 ```

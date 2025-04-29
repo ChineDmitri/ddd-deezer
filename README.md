@@ -137,3 +137,12 @@ npm run build
 - Vue Router pour la navigation
 - Chart.js pour la visualisation de données
 - Vite comme outil de build
+
+## Exécution des tests
+Assurez-vous que le serveur backend Django est en cours d'exécution sur le port 8000
+Assurez-vous que le client frontend Vue.js est en cours d'exécution sur le port 5173
+Exécutez les tests d'intégration:
+# À partir de la racine du projet
+```bash
+python -m unittest discover tests/integration
+```
